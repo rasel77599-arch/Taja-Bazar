@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>কৃষক হাট - সরাসরি মাঠের খাঁটি ও সতেজ শাকসবজি</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#16a34a',
+                        primaryDark: '#15803d',
+                        accent: '#f59e0b'
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body { font-family: 'Hind Siliguri', sans-serif; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased selection:bg-green-100 selection:text-green-800">
+
+    <!-- টপ বার -->
+    <div class="bg-gradient-to-r from-emerald-800 via-green-700 to-emerald-800 text-white text-xs sm:text-sm py-2 px-4 text-center font-medium shadow-sm flex items-center justify-center gap-2">
+        <span class="inline-flex items-center justify-center bg-amber-400 text-slate-900 rounded-full px-2 py-0.5 text-[11px] font-bold animate-pulse">অফার</span>
+        <span>আজকের অর্ডারে পাচ্ছেন নিশ্চিত তাজা পণ্যের গ্যারান্টি! ক্যাশ অন ডেলিভারি সুবিধা।</span>
+    </div>
+
+    <!-- মেইন হেডার -->
+    <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-sm transition-all">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
+            <div class="flex items-center gap-3 cursor-pointer select-none" onclick="showCustomerView()">
+                <div class="w-12 h-12 bg-gradient-to-tr from-green-600 to-emerald-500 rounded-2xl flex items-center justify-center text-white text-2xl shadow-lg shadow-green-600/30">
+                    <i class="fa-solid fa-leaf"></i>
+                </div>
+                <div>
+                    <span class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">কৃষক<span class="text-green-600">হাট</span></span>
+                    <span class="hidden sm:block text-[11px] font-semibold text-slate-400 uppercase tracking-wider">১০০% অর্গানিক ও বিষমুক্ত</span>
+                </div>
+            </div>
+
+            <!-- সার্চ বার -->
+            <div class="hidden md:flex flex-1 max-w-md relative">
+                <input type="text" id="search-input" onkeyup="handleSearch()" placeholder="পছন্দের সবজি খুঁজুন (যেমন: আলু, টমেটো, শাক)..." 
+                       class="w-full pl-11 pr-4 py-2.5 rounded-full border border-slate-300 bg-slate-50 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:bg-white transition">
+                <i class="fa-solid fa-magnifying-glass absolute left-4 top-3.5 text-slate-400"></i>
+            </div>
+
+            <!-- অ্যাকশন বাটনসমূহ -->
+            <div class="flex items-center gap-3">
+                <button onclick="toggleCartDrawer(true)" class="relative flex items-center gap-2 bg-green-50 hover:bg-green-100 text-green-700 font-bold px-4 py-2.5 rounded-xl border border-green-200 transition shadow-sm">
+                    <i class="fa-solid fa-basket-shopping text-lg"></i>
+                    <span class="hidden sm:inline text-sm">ব্যাগ</span>
+                    <span id="cart-badge" class="bg-red-500 text-white text-xs px-2 py-0.5 rounded-full font-bold">0</span>
+                </button>
+
+                <button onclick="openAdminModal()" class="px-3.5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl transition text-sm font-semibold flex items-center gap-1.5" title="এডমিন প্যানেল">
+                    <i class="fa-solid fa-lock"></i>
+                    <span class="hidden sm:inline">এডমিন</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- কাস্টমার ইন্টারফেস -->
+    <main id="customer-view">
+        <!-- হিরো সেকশন -->
+        <section class="relative bg-gradient-to-br from-emerald-900 via-green-800 to-teal-950 text-white overflow-hidden py-12 md:py-20 px-4">
+            <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-10">
+                <div class="max-w-xl text-center md:text-left z-10">
+                    <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 backdrop-blur border border-white/20 text-green-200 text-xs sm:text-sm font-semibold mb-6">
+                        <i class="fa-solid fa-shield-halved text-amber-400"></i> কোনো পচা বা বাসি সবজি দেওয়া হয় না
+                    </div>
+                    <h1 class="text-3xl sm:text-5xl lg:text-6xl font-black leading-tight mb-5 tracking-tight">
+                        মাঠের টাটকা সবজি, <br><span class="text-amber-400">সরাসরি আপনার রান্নাঘরে!</span>
+                    </h1>
+                    <p class="text-green-100 text-base sm:text-lg mb-8 leading-relaxed">
+                        সকালে খেত থেকে তোলা বিষমুক্ত তাজা শাকসবজি সুলভ মূল্যে পৌছে দিচ্ছি আপনার ঠিকানায়। ডেলিভারির সময় পণ্য দেখে পছন্দ হলে টাকা দিন।
+                    </p>
+                    <div class="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
+                        <a href="#products-section" class="bg-amber-400 hover:bg-amber-500 text-slate-950 font-bold px-8 py-4 rounded-xl shadow-xl shadow-amber-400/20 text-center transition transform active:scale-95 flex items-center justify-center gap-2">
+                            <span>পণ্য দেখুন ও অর্ডার করুন</span>
+                            <i class="fa-solid fa-arrow-down"></i>
+                        </a>
+                        <div class="flex items-center justify-center gap-3 px-4 py-2 text-sm text-green-200 font-medium">
+                            <i class="fa-solid fa-truck-fast text-2xl text-amber-400"></i>
+                            <div class="text-left">
+                                <p class="text-white font-bold text-xs uppercase">দ্রুত ডেলিভারি</p>
+                                <p class="text-[11px] text-green-300">ক্যাশ অন ডেলিভারি</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="relative w-full md:w-1/2 flex justify-center z-10">
+                    <div class="relative">
+                        <img src="https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=700&q=80" 
+                             alt="Fresh Veg" class="rounded-3xl shadow-2xl object-cover max-h-96 w-full max-w-md border-4 border-white/20">
+                        <div class="absolute -bottom-5 -left-5 bg-white text-slate-800 p-4 rounded-2xl shadow-xl border border-slate-100 flex items-center gap-3">
+                            <div class="w-12 h-12 bg-amber-100 text-amber-600 rounded-xl flex items-center justify-center text-2xl font-bold">
+                                ৳
+                            </div>
+                            <div>
+                                <p class="text-xs text-slate-500 font-bold">পছন্দ না হলে</p>
+                                <p class="text-sm font-extrabold text-green-700">১০০% মূল্য ফেরত বা এক্সচেঞ্জ</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ট্রাস্ট ও গ্যারান্টি বার -->
+        <section class="max-w-7xl mx-auto px-4 -mt-8 relative z-20">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 bg-white p-4 sm:p-6 rounded-2xl shadow-lg border border-slate-100 text-center">
+                <div class="p-2 border-r border-slate-100 last:border-none flex flex-col items-center">
+                    <i class="fa-solid fa-hand-holding-dollar text-green-600 text-2xl sm:text-3xl mb-2"></i>
+                    <h4 class="font-bold text-sm text-slate-800">ক্যাশ অন ডেলিভারি</h4>
+                    <p class="text-xs text-slate-500 mt-0.5">আগে পণ্য দেখুন, পরে টাকা দিন</p>
+                </div>
+                <div class="p-2 border-r border-slate-100 last:border-none flex flex-col items-center">
+                    <i class="fa-solid fa-arrows-rotate text-green-600 text-2xl sm:text-3xl mb-2"></i>
+                    <h4 class="font-bold text-sm text-slate-800">সহজ রিটার্ন</h4>
+                    <p class="text-xs text-slate-500 mt-0.5">পণ্য অপছন্দ হলে সাথে সাথে ফেরত</p>
+                </div>
+                <div class="p-2 border-r border-slate-100 last:border-none flex flex-col items-center">
+                    <i class="fa-solid fa-seedling text-green-600 text-2xl sm:text-3xl mb-2"></i>
+                    <h4 class="font-bold text-sm text-slate-800">১০০% বিষমুক্ত</h4>
+                    <p class="text-xs text-slate-500 mt-0.5">ফরমালিনমুক্ত তাজা শাকসবজি</p>
+                </div>
+                <div class="p-2 flex flex-col items-center">
+                    <i class="fa-solid fa-headset text-green-600 text-2xl sm:text-3xl mb-2"></i>
+                    <h4 class="font-bold text-sm text-slate-800">কাস্টমার সাপোর্ট</h4>
+                    <p class="text-xs text-slate-500 mt-0.5">যেকোনো তথ্যে পাশে আছি</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- প্রোডাক্ট তালিকা ও ফিল্টার -->
+        <section id="products-section" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+            <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
+                <div>
+                    <span class="text-green-700 font-bold text-sm uppercase tracking-wider">টাটকা বাজার</span>
+                    <h2 class="text-2xl sm:text-4xl font-extrabold text-slate-900 mt-1">আজকের টাটকা সবজির দাম</h2>
+                    <p class="text-slate-500 text-sm mt-1">পছন্দের পণ্য বেছে নিয়ে পরিমাণ অনুযায়ী অর্ডার করুন</p>
+                </div>
+
+                <div class="flex gap-2 overflow-x-auto hide-scrollbar py-1">
+                    <button onclick="filterCategory('all', this)" class="cat-btn active px-4 py-2 rounded-xl text-sm font-bold bg-green-700 text-white shadow-md transition">সবগুলো</button>
+                    <button onclick="filterCategory('সবজি', this)" class="cat-btn px-4 py-2 rounded-xl text-sm font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 transition">সবজি</button>
+                    <button onclick="filterCategory('শাক', this)" class="cat-btn px-4 py-2 rounded-xl text-sm font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 transition">শাক</button>
+                    <button onclick="filterCategory('সালাদ', this)" class="cat-btn px-4 py-2 rounded-xl text-sm font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 transition">সালাদ সামগ্রী</button>
+                </div>
+            </div>
+
+            <!-- লোডার স্পিনার -->
+            <div id="loading-spinner" class="text-center py-20">
+                <i class="fa-solid fa-circle-notch fa-spin text-4xl text-green-600"></i>
+                <p class="text-slate-500 mt-3 font-semibold text-sm">লাইভ পণ্য লোড হচ্ছে...</p>
+            </div>
+
+            <!-- প্রোডাক্ট গ্রিড -->
+            <div id="product-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"></div>
+        </section>
+
+        <!-- কাস্টমার রিভিউ -->
+        <section class="bg-emerald-50/60 py-16 px-4 border-y border-emerald-100">
+            <div class="max-w-7xl mx-auto text-center">
+                <span class="text-green-700 font-bold text-xs uppercase tracking-widest">সন্তুষ্ট গ্রাহক</span>
+                <h3 class="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-1 mb-10">গ্রাহকরা আমাদের সম্পর্কে কী বলছেন</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-left">
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-emerald-100">
+                        <div class="flex text-amber-400 text-sm mb-3"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i></div>
+                        <p class="text-slate-600 text-sm leading-relaxed mb-4">"প্রথমবার অর্ডার করে কিছুটা সংশয়ে ছিলাম। কিন্তু টমেটো আর লাল শাক এতো তাজা পেয়েছি যে আমি মুগ্ধ! ডেলিভারিও দ্রুত পেয়েছি।"</p>
+                        <div class="font-bold text-sm text-slate-800">মাহমুদুল হাসান — <span class="text-xs text-slate-400 font-normal">মিরপুর-১০, ঢাকা</span></div>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-emerald-100">
+                        <div class="flex text-amber-400 text-sm mb-3"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i></div>
+                        <p class="text-slate-600 text-sm leading-relaxed mb-4">"ক্যাশ অন ডেলিভারিতে চেক করে নিতে পেরে খুব নিশ্চিন্ত লাগল। সবজির মান বাজারের চেয়েও ফ্রেশ। ধন্যবাদ আপনাদের!"</p>
+                        <div class="font-bold text-sm text-slate-800">নুসরাত জাহান — <span class="text-xs text-slate-400 font-normal">উত্তরা, ঢাকা</span></div>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-emerald-100">
+                        <div class="flex text-amber-400 text-sm mb-3"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i></div>
+                        <p class="text-slate-600 text-sm leading-relaxed mb-4">"ওজন একদম সঠিক ছিল এবং দামও বাজারের চেয়ে কম। নিয়মিত এখান থেকেই নেব এখন।"</p>
+                        <div class="font-bold text-sm text-slate-800">তানভীর আহমেদ — <span class="text-xs text-slate-400 font-normal">ধানমন্ডি, ঢাকা</span></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- কার্ট ড্রয়ার ও অর্ডার চেকআউট -->
+    <div id="cart-drawer" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex justify-end">
+        <div class="bg-white w-full max-w-lg h-full flex flex-col shadow-2xl">
+            <div class="p-5 border-b border-slate-200 flex items-center justify-between bg-emerald-700 text-white">
+                <div class="flex items-center gap-2.5">
+                    <i class="fa-solid fa-basket-shopping text-xl"></i>
+                    <h3 class="font-bold text-lg">আপনার শপিং ব্যাগ</h3>
+                </div>
+                <button onclick="toggleCartDrawer(false)" class="text-white/80 hover:text-white text-2xl leading-none">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div id="cart-items-container" class="flex-1 overflow-y-auto p-5 space-y-3"></div>
+
+            <div class="border-t border-slate-200 bg-slate-50 p-5 space-y-4">
+                <div class="space-y-1.5 text-sm">
+                    <div class="flex justify-between text-slate-600">
+                        <span>পণ্যের মোট দাম:</span>
+                        <span id="cart-subtotal" class="font-semibold text-slate-800">০ ৳</span>
+                    </div>
+                    <div class="flex justify-between text-slate-600">
+                        <span>ডেলিভারি চার্জ:</span>
+                        <span class="font-semibold text-green-700">৫০ ৳ (ক্যাশ অন ডেলিভারি)</span>
+                    </div>
+                    <div class="flex justify-between text-base font-extrabold text-slate-900 pt-2 border-t border-slate-200">
+                        <span>সর্বমোট মূল্য:</span>
+                        <span id="cart-grand-total" class="text-green-700 text-xl">৫০ ৳</span>
+                    </div>
+                </div>
+
+                <form id="checkout-form" onsubmit="submitFullOrder(event)" class="space-y-3 pt-2">
+                    <input type="text" id="order-cust-name" required placeholder="আপনার পুরো নাম লিখুন *" 
+                           class="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-green-500 focus:outline-none">
+                    <input type="tel" id="order-cust-phone" required placeholder="মোবাইল নম্বর লিখুন (১১ ডিজিট) *" 
+                           class="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-green-500 focus:outline-none">
+                    <textarea id="order-cust-address" required rows="2" placeholder="সম্পূর্ণ ঠিকানা (বাসা নং, রোড নং, এলাকা) *" 
+                              class="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-green-500 focus:outline-none"></textarea>
+
+                    <div class="p-3 bg-amber-50 border border-amber-200 rounded-xl flex items-center gap-3">
+                        <i class="fa-solid fa-money-bill-transfer text-amber-600 text-xl"></i>
+                        <p class="text-xs text-amber-900 font-semibold leading-tight">পেমেন্ট মেথড: <b>ক্যাশ অন ডেলিভারি</b> (পণ্য হাতে পেয়ে দেখে টাকা দিবেন)</p>
+                    </div>
+
+                    <button type="submit" id="cart-submit-btn" class="w-full py-3.5 bg-green-600 hover:bg-green-700 text-white font-extrabold text-base rounded-xl shadow-lg shadow-green-600/30 transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-shield-check"></i> অর্ডার কনফার্ম করুন
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- ১-ক্লিকে সরাসরি অর্ডার পপআপ -->
+    <div id="quick-order-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl relative">
+            <button onclick="closeQuickOrderModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-700 text-xl">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <div class="flex items-center gap-3 mb-4 pb-3 border-b border-slate-100">
+                <img id="quick-prod-img" src="" class="w-16 h-16 rounded-xl object-cover border border-slate-200">
+                <div>
+                    <h3 id="quick-prod-name" class="font-bold text-slate-900 text-base">সবজির নাম</h3>
+                    <p class="text-xs text-slate-500">মূল্য: <span id="quick-prod-price" class="text-green-700 font-bold">০ ৳</span></p>
+                    <p class="text-xs font-semibold text-amber-600">পরিমাণ: <span id="quick-prod-qty">১</span></p>
+                </div>
+            </div>
+
+            <h4 class="font-extrabold text-sm text-slate-800 mb-3">ডেলিভারির তথ্য দিন:</h4>
+            <form onsubmit="handleQuickOrderSubmit(event)" class="space-y-3">
+                <input type="text" id="quick-name" required placeholder="আপনার নাম *" class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-green-500">
+                <input type="tel" id="quick-phone" required placeholder="মোবাইল নম্বর *" class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-green-500">
+                <textarea id="quick-address" required rows="2" placeholder="ডেলিভারির সম্পূর্ণ ঠিকানা *" class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-green-500"></textarea>
+
+                <div class="bg-green-50 p-3 rounded-xl border border-green-200 text-xs text-green-900 font-bold flex justify-between">
+                    <span>মোট বিল (ডেলিভারি সহ):</span>
+                    <span id="quick-total-bill">০ ৳</span>
+                </div>
+
+                <button type="submit" id="quick-submit-btn" class="w-full py-3.5 bg-green-600 hover:bg-green-700 text-white font-black rounded-xl shadow-md transition">
+                    অর্ডার নিশ্চিত করুন (ক্যাশ অন ডেলিভারি)
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- এডমিন লগইন মডাল -->
+    <div id="admin-login-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl text-center">
+            <div class="w-14 h-14 bg-slate-900 text-white rounded-2xl flex items-center justify-center mx-auto text-2xl mb-4 shadow-lg">
+                <i class="fa-solid fa-user-gear"></i>
+            </div>
+            <h3 class="font-extrabold text-xl text-slate-900">এডমিন প্যানেল প্রবেশ</h3>
+            <p class="text-xs text-slate-400 mt-1 mb-5">শুধুমাত্র মালিকের ব্যবহারের জন্য</p>
+            
+            <form onsubmit="handleAdminLogin(event)" class="space-y-4">
+                <input type="password" id="admin-input-pwd" required placeholder="এডমিন পাসওয়ার্ড দিন..." 
+                       class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-slate-900 text-sm">
+                
+                <div class="flex gap-2">
+                    <button type="button" onclick="closeAdminModal()" class="w-1/2 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-sm transition">বাতিল</button>
+                    <button type="submit" class="w-1/2 py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl text-sm transition shadow">প্রবেশ করুন</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- এডমিন ড্যাশবোর্ড স্ক্রিন -->
+    <div id="admin-view" class="hidden min-h-screen bg-slate-100 pb-20">
+        <nav class="bg-slate-900 text-white px-6 py-4 flex items-center justify-between sticky top-0 z-30 shadow-md">
+            <div class="flex items-center gap-3">
+                <i class="fa-solid fa-leaf text-green-400 text-xl"></i>
+                <h2 class="text-lg font-bold">কৃষক হাট — ফায়ারবেস লাইভ এডমিন</h2>
+            </div>
+            <div class="flex items-center gap-3">
+                <button onclick="changeAdminPassword()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-xs font-semibold rounded-lg text-slate-200 border border-slate-700">
+                    <i class="fa-solid fa-key mr-1"></i> পাসওয়ার্ড বদল
+                </button>
+                <button onclick="logoutAdmin()" class="px-3.5 py-1.5 bg-red-600 hover:bg-red-700 text-xs font-bold rounded-lg text-white">
+                    লগআউট
+                </button>
+            </div>
+        </nav>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 space-y-8">
+            <!-- মেট্রিক্স -->
+            <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
+                    <p class="text-xs font-bold text-slate-400 uppercase">মোট অর্ডার</p>
+                    <h3 id="stat-total" class="text-2xl font-black text-slate-800 mt-1">০</h3>
+                </div>
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
+                    <p class="text-xs font-bold text-amber-500 uppercase">নতুন/অপেক্ষমাণ অর্ডার</p>
+                    <h3 id="stat-pending" class="text-2xl font-black text-amber-600 mt-1">০</h3>
+                </div>
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
+                    <p class="text-xs font-bold text-green-600 uppercase">ডেলিভারি সম্পন্ন</p>
+                    <h3 id="stat-completed" class="text-2xl font-black text-green-600 mt-1">০</h3>
+                </div>
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
+                    <p class="text-xs font-bold text-blue-600 uppercase">মোট বিক্রয়</p>
+                    <h3 id="stat-income" class="text-2xl font-black text-blue-600 mt-1">০ ৳</h3>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- প্রোডাক্ট অ্যাড ফর্ম -->
+                <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 h-fit space-y-5">
+                    <h3 class="font-bold text-base text-slate-900 flex items-center gap-2">
+                        <i class="fa-solid fa-plus-circle text-green-600"></i> নতুন শাকসবজি যুক্ত করুন (Firebase Live)
+                    </h3>
+                    <form onsubmit="handleAddNewProduct(event)" class="space-y-3">
+                        <input type="text" id="p-name" required placeholder="পণ্যের নাম (যেমন: তাজা লাউ)" class="w-full px-3 py-2 text-sm rounded-xl border border-slate-300">
+                        <div class="grid grid-cols-2 gap-2">
+                            <input type="number" id="p-price" required placeholder="মূল্য (৳)" class="w-full px-3 py-2 text-sm rounded-xl border border-slate-300">
+                            <input type="number" id="p-old-price" placeholder="আগের দাম (অপশনাল)" class="w-full px-3 py-2 text-sm rounded-xl border border-slate-300">
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <select id="p-unit" class="w-full px-3 py-2 text-sm rounded-xl border border-slate-300 bg-white">
+                                <option value="কেজি">কেজি</option>
+                                <option value="আঁটি">আঁটি</option>
+                                <option value="পিস">পিস</option>
+                            </select>
+                            <select id="p-category" class="w-full px-3 py-2 text-sm rounded-xl border border-slate-300 bg-white">
+                                <option value="সবজি">সবজি</option>
+                                <option value="শাক">শাক</option>
+                                <option value="সালাদ">সালাদ</option>
+                            </select>
+                        </div>
+                        <input type="url" id="p-image" required placeholder="ছবির ডিরেক্ট লিংক (Image URL)" class="w-full px-3 py-2 text-sm rounded-xl border border-slate-300">
+                        <button type="submit" id="add-prod-btn" class="w-full py-2.5 bg-green-600 hover:bg-green-700 text-white font-bold rounded-xl text-sm transition shadow flex items-center justify-center gap-2">
+                            <span>পণ্য ডাটাবেজে সেভ করুন</span>
+                        </button>
+                    </form>
+
+                    <div class="pt-4 border-t border-slate-200">
+                        <h4 class="font-bold text-xs text-slate-400 uppercase tracking-wider mb-3">লাইভ পণ্য তালিকা</h4>
+                        <div id="admin-products-container" class="space-y-2 max-h-56 overflow-y-auto pr-1"></div>
+                    </div>
+                </div>
+
+                <!-- অর্ডার টেবিল -->
+                <div class="lg:col-span-2 bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
+                    <h3 class="font-bold text-base text-slate-900 mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-receipt text-amber-500"></i> লাইভ কাস্টমার অর্ডার তালিকা
+                    </h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm border-collapse">
+                            <thead>
+                                <tr class="bg-slate-50 border-b border-slate-200 text-slate-500 text-xs">
+                                    <th class="p-3">অর্ডার নং ও সময়</th>
+                                    <th class="p-3">কাস্টমার তথ্য</th>
+                                    <th class="p-3">পণ্য তালিকা</th>
+                                    <th class="p-3">মোট বিল</th>
+                                    <th class="p-3">অ্যাকশন</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-orders-container" class="divide-y divide-slate-100"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- লাইভ সেলস টোস্ট -->
+    <div id="sales-toast" class="fixed bottom-5 left-5 z-40 bg-white/95 backdrop-blur-md p-3.5 rounded-2xl shadow-2xl border border-slate-200 flex items-center gap-3 transition-all duration-500 transform translate-y-24 opacity-0 pointer-events-none max-w-xs">
+        <div class="w-10 h-10 rounded-xl bg-green-100 text-green-700 flex items-center justify-center text-lg flex-shrink-0">
+            <i class="fa-solid fa-bag-shopping"></i>
+        </div>
+        <div>
+            <p id="toast-text" class="text-xs font-bold text-slate-800 leading-tight">নতুন অর্ডার!</p>
+            <span class="text-[10px] text-slate-400">এইমাত্র ক্যাশ অন ডেলিভারিতে অর্ডার হয়েছে</span>
+        </div>
+    </div>
+
+    <!-- FIREBASE MODULE স্ক্রিপ্ট -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-analytics.js";
+        import { getDatabase, ref, set, push, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-database.js";
+
+        // আপনার দেওয়া নতুন Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyAs6TepdIB12dgFXc9Q1GbZfYlgBiI2EBY",
+            authDomain: "taja-bazar-16c12.firebaseapp.com",
+            databaseURL: "https://taja-bazar-16c12-default-rtdb.firebaseio.com",
+            projectId: "taja-bazar-16c12",
+            storageBucket: "taja-bazar-16c12.firebasestorage.app",
+            messagingSenderId: "806599820685",
+            appId: "1:806599820685:web:a1d9aa72f2a9bbcc0469c4",
+            measurementId: "G-NCF0RVZCYE"
+        };
+
+        // Firebase ইনিশিয়ালাইজেশন
+        const app = initializeApp(firebaseConfig);
+        try { getAnalytics(app); } catch(e) {}
+        const db = getDatabase(app);
+
+        // গ্লোবাল ভ্যারিয়েবল
+        let products = [];
+        let orders = [];
+        let cart = [];
+        let currentCategory = 'all';
+        let quickOrderItem = null;
+        let adminPassword = localStorage.getItem('kh_admin_pass') || 'admin123';
+
+        const defaultProducts = [
+            { name: "টাটকা গোল আলু", category: "সবজি", price: 45, oldPrice: 50, unit: "কেজি", image: "https://images.unsplash.com/photo-1518977676601-b53f82aba655?auto=format&fit=crop&w=500&q=80" },
+            { name: "দেশি পাকা টমেটো", category: "সবজি", price: 60, oldPrice: 75, unit: "কেজি", image: "https://images.unsplash.com/photo-1592924357228-91a4daadcfea?auto=format&fit=crop&w=500&q=80" },
+            { name: "সবুজ কচি শসা", category: "সালাদ", price: 50, oldPrice: 60, unit: "কেজি", image: "https://images.unsplash.com/photo-1604977042946-1eecc30f269e?auto=format&fit=crop&w=500&q=80" },
+            { name: "তাজা মিষ্টি গাজর", category: "সালাদ", price: 70, oldPrice: 85, unit: "কেজি", image: "https://images.unsplash.com/photo-1598170845058-32b9d6a5da37?auto=format&fit=crop&w=500&q=80" },
+            { name: "সবুজ পাতাযুক্ত বাঁধাকপি", category: "সবজি", price: 40, oldPrice: 45, unit: "পিস", image: "https://images.unsplash.com/photo-1594282486552-05b4d80fbb9f?auto=format&fit=crop&w=500&q=80" },
+            { name: "মাঠের তাজা পালং শাক", category: "শাক", price: 30, oldPrice: 35, unit: "আঁটি", image: "https://images.unsplash.com/photo-1576045057995-568f588f82fb?auto=format&fit=crop&w=500&q=80" }
+        ];
+
+        // ১. ফায়ারবেস থেকে লাইভ প্রোডাক্ট লোড ও সিঙ্ক করা
+        const productsRef = ref(db, 'products');
+        onValue(productsRef, (snapshot) => {
+            const data = snapshot.val();
+            document.getElementById('loading-spinner').classList.add('hidden');
+            
+            if (data) {
+                products = Object.keys(data).map(key => ({
+                    id: key,
+                    ...data[key]
+                }));
+            } else {
+                // ডাটাবেস সম্পূর্ণ খালি থাকলে ডিফল্ট পণ্য আপলোড করে দেওয়া
+                defaultProducts.forEach(prod => {
+                    const newProdRef = push(ref(db, 'products'));
+                    set(newProdRef, prod);
+                });
+                return;
+            }
+            renderProducts();
+            if (!document.getElementById('admin-view').classList.contains('hidden')) {
+                renderAdminDashboard();
+            }
+        });
+
+        // ২. ফায়ারবেস থেকে লাইভ অর্ডার লোড ও সিঙ্ক করা
+        const ordersRef = ref(db, 'orders');
+        onValue(ordersRef, (snapshot) => {
+            const data = snapshot.val();
+            if (data) {
+                orders = Object.keys(data).map(key => ({
+                    firebaseKey: key,
+                    ...data[key]
+                })).reverse();
+            } else {
+                orders = [];
+            }
+            if (!document.getElementById('admin-view').classList.contains('hidden')) {
+                renderAdminDashboard();
+            }
+        });
+
+        // প্রোডাক্ট রেন্ডার
+        window.renderProducts = function() {
+            const grid = document.getElementById('product-grid');
+            grid.innerHTML = "";
+
+            let items = products;
+            if (currentCategory !== 'all') {
+                items = products.filter(p => p.category === currentCategory);
+            }
+
+            if(items.length === 0) {
+                grid.innerHTML = `<div class="col-span-full text-center py-12 text-slate-400 font-medium">কোনো পণ্য পাওয়া যায়নি।</div>`;
+                return;
+            }
+
+            items.forEach(prod => {
+                const discount = prod.oldPrice ? Math.round(((prod.oldPrice - prod.price) / prod.oldPrice) * 100) : null;
+                grid.innerHTML += `
+                    <div class="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between group">
+                        <div class="relative overflow-hidden">
+                            <img src="${prod.image}" alt="${prod.name}" class="w-full h-48 object-cover group-hover:scale-105 transition duration-500">
+                            ${discount ? `<span class="absolute top-3 left-3 bg-red-500 text-white text-[11px] font-black px-2.5 py-1 rounded-full shadow">${discount}% ছাড়</span>` : ''}
+                            <span class="absolute top-3 right-3 bg-white/90 backdrop-blur text-green-700 text-[11px] font-bold px-2 py-0.5 rounded-md shadow">
+                                ${prod.category}
+                            </span>
+                        </div>
+
+                        <div class="p-5 flex-1 flex flex-col justify-between">
+                            <div>
+                                <h3 class="font-extrabold text-slate-900 text-base mb-1">${prod.name}</h3>
+                                <div class="flex items-baseline gap-2 mb-4">
+                                    <span class="text-xl font-black text-green-700">${prod.price} ৳</span>
+                                    ${prod.oldPrice ? `<span class="text-xs text-slate-400 line-through">${prod.oldPrice} ৳</span>` : ''}
+                                    <span class="text-xs text-slate-500 font-medium">/ প্রতি ${prod.unit}</span>
+                                </div>
+                            </div>
+
+                            <div class="space-y-3 pt-3 border-t border-slate-100">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs font-semibold text-slate-500">পরিমাণ নির্বাচন:</span>
+                                    <div class="flex items-center border border-slate-200 rounded-xl overflow-hidden bg-slate-50">
+                                        <button onclick="changeQty('${prod.id}', -1)" class="w-8 h-8 flex items-center justify-center font-bold text-slate-600 hover:bg-slate-200">-</button>
+                                        <span id="qty-val-${prod.id}" class="w-10 text-center text-sm font-extrabold text-slate-800">1</span>
+                                        <button onclick="changeQty('${prod.id}', 1)" class="w-8 h-8 flex items-center justify-center font-bold text-slate-600 hover:bg-slate-200">+</button>
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-2 gap-2">
+                                    <button onclick="addToBag('${prod.id}')" class="py-2.5 px-2 bg-green-50 hover:bg-green-100 text-green-700 font-bold rounded-xl text-xs border border-green-200 transition">
+                                        <i class="fa-solid fa-basket-shopping mr-1"></i> ব্যাগে নিন
+                                    </button>
+                                    <button onclick="openQuickOrder('${prod.id}')" class="py-2.5 px-2 bg-green-600 hover:bg-green-700 text-white font-bold rounded-xl text-xs transition shadow-md shadow-green-600/20">
+                                        সরাসরি অর্ডার
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+        };
+
+        window.changeQty = function(prodId, delta) {
+            const qtyElem = document.getElementById(`qty-val-${prodId}`);
+            let val = parseInt(qtyElem.innerText) + delta;
+            if (val < 1) val = 1;
+            qtyElem.innerText = val;
+        };
+
+        window.filterCategory = function(cat, btn) {
+            document.querySelectorAll('.cat-btn').forEach(b => {
+                b.classList.remove('bg-green-700', 'text-white', 'shadow-md');
+                b.classList.add('bg-slate-100', 'text-slate-700');
+            });
+            btn.classList.remove('bg-slate-100', 'text-slate-700');
+            btn.classList.add('bg-green-700', 'text-white', 'shadow-md');
+
+            currentCategory = cat;
+            renderProducts();
+        };
+
+        window.handleSearch = function() {
+            const query = document.getElementById('search-input').value.toLowerCase();
+            const filtered = products.filter(p => p.name.toLowerCase().includes(query));
+            renderProducts(filtered);
+        };
+
+        window.addToBag = function(prodId) {
+            const product = products.find(p => p.id === prodId);
+            const qtyElem = document.getElementById(`qty-val-${prodId}`);
+            const qty = parseInt(qtyElem.innerText);
+
+            const existing = cart.find(item => item.id === prodId);
+            if(existing) {
+                existing.qty += qty;
+            } else {
+                cart.push({ ...product, qty });
+            }
+
+            qtyElem.innerText = 1;
+            updateCart();
+            toggleCartDrawer(true);
+
+            Swal.fire({
+                toast: true,
+                position: 'top-end',
+                icon: 'success',
+                title: `${product.name} ব্যাগে যোগ হয়েছে!`,
+                showConfirmButton: false,
+                timer: 1500
+            });
+        };
+
+        window.updateCart = function() {
+            const count = cart.reduce((acc, c) => acc + c.qty, 0);
+            document.getElementById('cart-badge').innerText = count;
+
+            const container = document.getElementById('cart-items-container');
+            const subtotalElem = document.getElementById('cart-subtotal');
+            const grandTotalElem = document.getElementById('cart-grand-total');
+
+            if(cart.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-16 text-slate-400">
+                        <i class="fa-solid fa-basket-shopping text-5xl mb-3 text-slate-300"></i>
+                        <p class="font-bold text-sm">আপনার ব্যাগ খালি!</p>
+                        <p class="text-xs mt-1">পণ্য পছন্দ করে ব্যাগে যোগ করুন</p>
+                    </div>
+                `;
+                subtotalElem.innerText = "০ ৳";
+                grandTotalElem.innerText = "০ ৳";
+                return;
+            }
+
+            container.innerHTML = "";
+            let subtotal = 0;
+
+            cart.forEach((item, index) => {
+                const cost = item.price * item.qty;
+                subtotal += cost;
+                container.innerHTML += `
+                    <div class="flex items-center justify-between p-3 bg-slate-50 border border-slate-200 rounded-2xl">
+                        <div class="flex items-center gap-3">
+                            <img src="${item.image}" class="w-12 h-12 rounded-xl object-cover">
+                            <div>
+                                <h4 class="font-bold text-sm text-slate-800">${item.name}</h4>
+                                <span class="text-xs text-slate-500">${item.qty} ${item.unit} × ${item.price} ৳ = <b class="text-green-700">${cost} ৳</b></span>
+                            </div>
+                        </div>
+                        <button onclick="removeCartItem(${index})" class="w-8 h-8 rounded-lg bg-red-50 hover:bg-red-100 text-red-500 transition flex items-center justify-center">
+                            <i class="fa-solid fa-trash-can text-xs"></i>
+                        </button>
+                    </div>
+                `;
+            });
+
+            subtotalElem.innerText = `${subtotal} ৳`;
+            grandTotalElem.innerText = `${subtotal + 50} ৳`;
+        };
+
+        window.removeCartItem = function(index) {
+            cart.splice(index, 1);
+            updateCart();
+        };
+
+        window.toggleCartDrawer = function(open) {
+            const drawer = document.getElementById('cart-drawer');
+            if(open) drawer.classList.remove('hidden');
+            else drawer.classList.add('hidden');
+        };
+
+        // ফুল অর্ডার Firebase-এ পাঠানো
+        window.submitFullOrder = async function(e) {
+            e.preventDefault();
+            if(cart.length === 0) {
+                Swal.fire('দুঃখিত!', 'আপনার ব্যাগে কোনো পণ্য নেই!', 'warning');
+                return;
+            }
+
+            const btn = document.getElementById('cart-submit-btn');
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> প্রসেস হচ্ছে...`;
+            btn.disabled = true;
+
+            const name = document.getElementById('order-cust-name').value;
+            const phone = document.getElementById('order-cust-phone').value;
+            const address = document.getElementById('order-cust-address').value;
+            const subtotal = cart.reduce((acc, c) => acc + (c.price * c.qty), 0);
+
+            const newOrder = {
+                id: "KH-" + Math.floor(100000 + Math.random() * 900000),
+                name,
+                phone,
+                address,
+                items: [...cart],
+                total: subtotal + 50,
+                status: "Pending",
+                time: new Date().toLocaleTimeString('bn-BD', { hour: '2-digit', minute: '2-digit' }) + ', ' + new Date().toLocaleDateString('bn-BD')
+            };
+
+            try {
+                const newOrderRef = push(ref(db, 'orders'));
+                await set(newOrderRef, newOrder);
+
+                cart = [];
+                updateCart();
+                toggleCartDrawer(false);
+                e.target.reset();
+
+                Swal.fire({
+                    icon: 'success',
+                    title: 'অর্ডার সফল হয়েছে!',
+                    text: `${name}, আপনার অর্ডারটি লাইভ ডাটাবেজে জমা হয়েছে। দ্রুত আমাদের প্রতিনিধি আপনার ঠিকানায় পণ্য পৌঁছে দিবেন।`,
+                    confirmButtonColor: '#16a34a'
+                });
+            } catch(err) {
+                Swal.fire('ত্রুটি!', 'অর্ডার পাঠাতে সমস্যা হয়েছে। ইন্টারনেট চেক করুন।', 'error');
+            } finally {
+                btn.innerHTML = `<i class="fa-solid fa-shield-check"></i> অর্ডার কনফার্ম করুন`;
+                btn.disabled = false;
+            }
+        };
+
+        // কুইক অর্ডার মডাল
+        window.openQuickOrder = function(prodId) {
+            const product = products.find(p => p.id === prodId);
+            const qtyElem = document.getElementById(`qty-val-${prodId}`);
+            const qty = parseInt(qtyElem.innerText);
+
+            quickOrderItem = { ...product, qty };
+
+            document.getElementById('quick-prod-img').src = product.image;
+            document.getElementById('quick-prod-name').innerText = product.name;
+            document.getElementById('quick-prod-price').innerText = `${product.price} ৳`;
+            document.getElementById('quick-prod-qty').innerText = `${qty} ${product.unit}`;
+            document.getElementById('quick-total-bill').innerText = `${(product.price * qty) + 50} ৳ (ডেলিভারি ৫০ ৳ সহ)`;
+
+            document.getElementById('quick-order-modal').classList.remove('hidden');
+        };
+
+        window.closeQuickOrderModal = function() {
+            document.getElementById('quick-order-modal').classList.add('hidden');
+        };
+
+        window.handleQuickOrderSubmit = async function(e) {
+            e.preventDefault();
+            const btn = document.getElementById('quick-submit-btn');
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> প্রসেস হচ্ছে...`;
+            btn.disabled = true;
+
+            const name = document.getElementById('quick-name').value;
+            const phone = document.getElementById('quick-phone').value;
+            const address = document.getElementById('quick-address').value;
+
+            const newOrder = {
+                id: "KH-" + Math.floor(100000 + Math.random() * 900000),
+                name,
+                phone,
+                address,
+                items: [quickOrderItem],
+                total: (quickOrderItem.price * quickOrderItem.qty) + 50,
+                status: "Pending",
+                time: new Date().toLocaleTimeString('bn-BD', { hour: '2-digit', minute: '2-digit' }) + ', ' + new Date().toLocaleDateString('bn-BD')
+            };
+
+            try {
+                const newOrderRef = push(ref(db, 'orders'));
+                await set(newOrderRef, newOrder);
+
+                closeQuickOrderModal();
+                e.target.reset();
+
+                Swal.fire({
+                    icon: 'success',
+                    title: 'অর্ডার গ্রহণ করা হয়েছে!',
+                    text: `ধন্যবাদ ${name}! ক্যাশ অন ডেলিভারিতে আপনার অর্ডার ডাটাবেজে জমা হয়েছে।`,
+                    confirmButtonColor: '#16a34a'
+                });
+            } catch(err) {
+                Swal.fire('ত্রুটি!', 'অর্ডার গ্রহণে সমস্যা হয়েছে। আবার চেষ্টা করুন।', 'error');
+            } finally {
+                btn.innerHTML = `অর্ডার নিশ্চিত করুন (ক্যাশ অন ডেলিভারি)`;
+                btn.disabled = false;
+            }
+        };
+
+        // ==================== এডমিন কন্ট্রোল ====================
+        window.openAdminModal = function() { document.getElementById('admin-login-modal').classList.remove('hidden'); };
+        window.closeAdminModal = function() { document.getElementById('admin-login-modal').classList.add('hidden'); };
+
+        window.handleAdminLogin = function(e) {
+            e.preventDefault();
+            const pwd = document.getElementById('admin-input-pwd').value;
+            if(pwd === adminPassword) {
+                closeAdminModal();
+                document.getElementById('admin-input-pwd').value = "";
+                document.getElementById('customer-view').classList.add('hidden');
+                document.getElementById('admin-view').classList.remove('hidden');
+                renderAdminDashboard();
+            } else {
+                Swal.fire('ভুল পাসওয়ার্ড!', 'সঠিক এডমিন পাসওয়ার্ড দিন', 'error');
+            }
+        };
+
+        window.showCustomerView = function() {
+            document.getElementById('admin-view').classList.add('hidden');
+            document.getElementById('customer-view').classList.remove('hidden');
+        };
+
+        window.logoutAdmin = function() {
+            showCustomerView();
+        };
+
+        window.changeAdminPassword = function() {
+            const old = prompt("বর্তমান পাসওয়ার্ড লিখুন:");
+            if(old === adminPassword) {
+                const newP = prompt("নতুন পাসওয়ার্ড দিন:");
+                if(newP && newP.trim() !== "") {
+                    adminPassword = newP.trim();
+                    localStorage.setItem('kh_admin_pass', adminPassword);
+                    alert("পাসওয়ার্ড সফলভাবে পরিবর্তন হয়েছে!");
+                }
+            } else if (old !== null) {
+                alert("ভুল পাসওয়ার্ড!");
+            }
+        };
+
+        window.renderAdminDashboard = function() {
+            document.getElementById('stat-total').innerText = orders.length;
+            document.getElementById('stat-pending').innerText = orders.filter(o => o.status === "Pending").length;
+            document.getElementById('stat-completed').innerText = orders.filter(o => o.status === "Delivered").length;
+            const revenue = orders.filter(o => o.status === "Delivered").reduce((sum, o) => sum + o.total, 0);
+            document.getElementById('stat-income').innerText = `${revenue} ৳`;
+
+            // এডমিন প্রোডাক্ট লিস্ট
+            const prodList = document.getElementById('admin-products-container');
+            prodList.innerHTML = "";
+            products.forEach((p) => {
+                prodList.innerHTML += `
+                    <div class="flex items-center justify-between p-2 bg-slate-50 border rounded-xl text-xs">
+                        <div class="flex items-center gap-2">
+                            <img src="${p.image}" class="w-8 h-8 rounded object-cover">
+                            <span class="font-bold text-slate-800">${p.name}</span>
+                            <span class="text-green-700">${p.price} ৳/${p.unit}</span>
+                        </div>
+                        <button onclick="deleteProductFromFirebase('${p.id}')" class="text-red-500 hover:text-red-700 p-1">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </div>
+                `;
+            });
+
+            // অর্ডার টেবিল
+            const orderTable = document.getElementById('admin-orders-container');
+            orderTable.innerHTML = "";
+            if(orders.length === 0) {
+                orderTable.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-slate-400">কোনো অর্ডার আসেনি</td></tr>`;
+                return;
+            }
+
+            orders.forEach((ord) => {
+                const itemsText = ord.items.map(i => `${i.name} (${i.qty} ${i.unit})`).join(', ');
+                orderTable.innerHTML += `
+                    <tr class="hover:bg-slate-50 text-xs">
+                        <td class="p-3 font-semibold">
+                            <div>#${ord.id}</div>
+                            <div class="text-[10px] text-slate-400">${ord.time}</div>
+                            <span class="inline-block mt-1 px-2 py-0.5 rounded-full font-bold text-[10px] ${ord.status === 'Delivered' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}">${ord.status}</span>
+                        </td>
+                        <td class="p-3">
+                            <div class="font-bold text-slate-900">${ord.name}</div>
+                            <div class="text-slate-500"><i class="fa-solid fa-phone text-[10px] mr-1"></i>${ord.phone}</div>
+                            <div class="text-slate-400 text-[11px] max-w-xs">${ord.address}</div>
+                        </td>
+                        <td class="p-3 font-medium text-slate-600 max-w-xs">${itemsText}</td>
+                        <td class="p-3 font-extrabold text-green-700 text-sm">${ord.total} ৳</td>
+                        <td class="p-3 space-x-1">
+                            ${ord.status === 'Pending' ? `
+                                <button onclick="markDeliveredInFirebase('${ord.firebaseKey}')" class="p-2 bg-green-600 hover:bg-green-700 text-white rounded-lg" title="কনফার্ম / ডেলিভার্ড করুন">
+                                    <i class="fa-solid fa-check"></i>
+                                </button>
+                            ` : ''}
+                            <button onclick="deleteOrderFromFirebase('${ord.firebaseKey}')" class="p-2 bg-red-100 hover:bg-red-200 text-red-600 rounded-lg" title="মুছে ফেলুন">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+        };
+
+        // Firebase-এ প্রোডাক্ট যোগ
+        window.handleAddNewProduct = async function(e) {
+            e.preventDefault();
+            const btn = document.getElementById('add-prod-btn');
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> আপলোড হচ্ছে...`;
+            btn.disabled = true;
+
+            const name = document.getElementById('p-name').value;
+            const price = parseFloat(document.getElementById('p-price').value);
+            const oldPrice = parseFloat(document.getElementById('p-old-price').value) || null;
+            const unit = document.getElementById('p-unit').value;
+            const category = document.getElementById('p-category').value;
+            const image = document.getElementById('p-image').value;
+
+            try {
+                const newProdRef = push(ref(db, 'products'));
+                await set(newProdRef, { name, price, oldPrice, unit, category, image });
+                e.target.reset();
+                Swal.fire('সফল!', 'পণ্যটি Firebase ডাটাবেজে লাইভ যুক্ত হয়েছে এবং সবাই দেখতে পাচ্ছে!', 'success');
+            } catch(err) {
+                Swal.fire('ত্রুটি!', 'পণ্য যুক্ত করা যায়নি। Firebase এর Rules চেক করুন।', 'error');
+            } finally {
+                btn.innerHTML = `<span>পণ্য ডাটাবেজে সেভ করুন</span>`;
+                btn.disabled = false;
+            }
+        };
+
+        // Firebase থেকে পণ্য ডিলিট
+        window.deleteProductFromFirebase = async function(prodId) {
+            if(confirm("আপনি কি নিশ্চিত পণ্যটি সবার ডিভাইসের ডাটাবেজ থেকে মুছে ফেলতে চান?")) {
+                await remove(ref(db, `products/${prodId}`));
+                Swal.fire('মুছে ফেলা হয়েছে!', 'পণ্যটি সরানো হয়েছে।', 'success');
+            }
+        };
+
+        // Firebase-এ অর্ডার স্ট্যাটাস আপডেট
+        window.markDeliveredInFirebase = async function(firebaseKey) {
+            await update(ref(db, `orders/${firebaseKey}`), { status: "Delivered" });
+            Swal.fire('আপডেট হয়েছে!', 'অর্ডার ডেলিভার্ড হিসেবে চিহ্নিত হয়েছে।', 'success');
+        };
+
+        // Firebase থেকে অর্ডার ডিলিট
+        window.deleteOrderFromFirebase = async function(firebaseKey) {
+            if(confirm("অর্ডারটি মুছে ফেলতে চান?")) {
+                await remove(ref(db, `orders/${firebaseKey}`));
+            }
+        };
+
+        // সোশ্যাল প্রুফ লাইভ টোস্ট
+        const fakeCustomerOrders = [
+            "মিরপুর থেকে জামিল সাহেব ৩ কেজি আলু অর্ডার করেছেন",
+            "উত্তরা থেকে সুমাইয়া বেগম ১ কেজি টমেটো অর্ডার করেছেন",
+            "ধানমন্ডি থেকে ফারহান ২ আঁটি লাল শাক অর্ডার করেছেন",
+            "বনশ্রী থেকে আরিফ ১ কেজি শসা ও কাঁচা মরিচ নিয়েছেন"
+        ];
+
+        setInterval(() => {
+            const randomMsg = fakeCustomerOrders[Math.floor(Math.random() * fakeCustomerOrders.length)];
+            const toast = document.getElementById('sales-toast');
+            document.getElementById('toast-text').innerText = randomMsg;
+            toast.classList.remove('translate-y-24', 'opacity-0');
+            setTimeout(() => {
+                toast.classList.add('translate-y-24', 'opacity-0');
+            }, 4000);
+        }, 12000);
+
+        updateCart();
+    </script>
+</body>
+</html>
